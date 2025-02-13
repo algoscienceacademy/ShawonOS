@@ -4,10 +4,12 @@
 #include "process.h"
 #include "syscall.h"
 #include "idt.h"
+#include "isr.h"    // Add this include
 
 void kernel_main(void) {
     // Initialize IDT first
     init_idt();
+    isr_init();
     
     // Initialize subsystems
     init_memory_manager();
