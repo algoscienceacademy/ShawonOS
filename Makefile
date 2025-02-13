@@ -6,7 +6,7 @@ ASMFLAGS=-f elf32
 CFLAGS=-m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -nostartfiles -nodefaultlibs -Wall -Wextra -c -I src/include
 LDFLAGS=-T src/linker.ld -melf_i386
 
-OBJECTS=obj/boot.o obj/kernel.o obj/memory.o obj/process.o obj/syscall.o
+OBJECTS=obj/boot.o obj/kernel.o obj/memory.o obj/process.o obj/syscall.o obj/idt.o obj/idt_load.o
 
 .PHONY: all clean run
 
@@ -31,6 +31,17 @@ obj/process.o: src/kernel/process.c
 obj/syscall.o: src/kernel/syscall.c
 	@mkdir -p obj
 	$(CC) $(CFLAGS) $< -o $@
+
+obj/idt.o: src/kernel/idt.c
+	@mkdir -p obj
+	$(CC) $(CFLAGS) $< -o $@
+
+# Update assembly file compilation rules
+obj/%.o: src/boot/%.asm
+	nasm -f elf32 $< -o $@
+
+obj/%.o: src/kernel/%.asm
+	nasm -f elf32 $< -o $@
 
 bin/shawonos.bin: $(OBJECTS)
 	@mkdir -p bin

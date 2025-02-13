@@ -3,12 +3,19 @@
 #include "memory.h"
 #include "process.h"
 #include "syscall.h"
+#include "idt.h"
 
 void kernel_main(void) {
+    // Initialize IDT first
+    init_idt();
+    
     // Initialize subsystems
     init_memory_manager();
     init_scheduler();
     init_syscalls();
+
+    // Enable interrupts
+    asm volatile("sti");
 
     // Display welcome message
     const char *str = "Welcome to ShawonOS!";
