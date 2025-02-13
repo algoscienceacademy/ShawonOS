@@ -6,7 +6,7 @@ ASMFLAGS=-f elf32
 CFLAGS=-m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -nostartfiles -nodefaultlibs -Wall -Wextra -c -I src/include
 LDFLAGS=-T src/linker.ld -melf_i386
 
-OBJECTS=obj/boot.o obj/kernel.o obj/memory.o obj/process.o obj/syscall.o obj/idt.o obj/idt_load.o obj/isr.o obj/isr_asm.o
+OBJECTS=obj/boot.o obj/kernel.o obj/memory.o obj/process.o obj/syscall.o obj/idt.o obj/idt_load.o obj/isr.o obj/isr_asm.o obj/interrupt.o obj/interrupt_asm.o
 
 .PHONY: all clean run
 
@@ -44,6 +44,13 @@ obj/isr_asm.o: src/kernel/isr_asm.asm
 	@mkdir -p obj
 	nasm -f elf32 $< -o $@
 
+# Add compilation rules for interrupt files
+obj/interrupt.o: src/kernel/interrupt.c
+	$(CC) $(CFLAGS) $< -o $@
+
+obj/interrupt_asm.o: src/kernel/interrupt_asm.asm
+	nasm -f elf32 $< -o $@
+
 # Update assembly file compilation rules
 obj/%.o: src/boot/%.asm
 	nasm -f elf32 $< -o $@
@@ -51,7 +58,8 @@ obj/%.o: src/boot/%.asm
 obj/%.o: src/kernel/%.asm
 	nasm -f elf32 $< -o $@
 
-bin/shawonos.bin: obj/boot.o obj/kernel.o obj/memory.o obj/process.o obj/syscall.o obj/idt.o obj/idt_load.o obj/isr.o obj/isr_asm.o
+# Update the linking rule to include the new object files
+bin/shawonos.bin: obj/boot.o obj/kernel.o obj/memory.o obj/process.o obj/syscall.o obj/idt.o obj/idt_load.o obj/isr.o obj/isr_asm.o obj/interrupt.o obj/interrupt_asm.o
 	@mkdir -p bin
 	$(LD) $(LDFLAGS) $^ -o $@
 
